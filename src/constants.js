@@ -10,7 +10,7 @@ export const CHANNEL_ID = [
 
 export const BOT_ID = "175093545";
 
-export const SQUIRT_ENABLED = ["deanobeano", "skyyriel"];
+export const SQUIRT_DISABLED = ["skyyriel"];
 
 export const LEVELS_DISABLED = ["deanobeano"];
 

@@ -68,8 +68,7 @@ async function handleWebSocketMessage(data) {
                     react.add_user(data);
 
                     if (
-                        BOT_USERNAME ===
-                        data.payload.event.broadcaster_user_login
+                        BOT_USERNAME === data.payload.event.chatter_user_login
                     ) {
                         await tool.sleep(2000);
                     }
