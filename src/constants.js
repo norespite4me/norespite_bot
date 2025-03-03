@@ -6,6 +6,7 @@ export const CHANNEL_ID = [
     "869092522", //sb_honey
     "106389328", //srryimsara
     "57216234", //bloo
+    "150875583", //ox
 ];
 
 export const BOT_ID = "175093545";
