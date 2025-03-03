@@ -82,7 +82,7 @@ async function handleWebSocketMessage(data) {
     }
 }
 
-export async function sendChatMessage(chatMessage) {
+export async function sendChatMessage(channel, chatMessage) {
     let response = await fetch("https://api.twitch.tv/helix/chat/messages", {
         method: "POST",
         headers: {
@@ -91,7 +91,7 @@ export async function sendChatMessage(chatMessage) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            broadcaster_id: CHANNEL_ID,
+            broadcaster_id: channel,
             sender_id: BOT_ID,
             message: chatMessage,
         }),
@@ -107,6 +107,49 @@ export async function sendChatMessage(chatMessage) {
 }
 
 async function registerEventSubListeners() {
+    var response = [];
+
+    for (var i = 0; i < CHANNEL_ID.length; i++) {
+        response.push(
+            await fetch("https://api.twitch.tv/helix/eventsub/subscriptions", {
+                method: "POST",
+                headers: {
+                    Authorization: "Bearer " + OAUTH_TOKEN,
+                    "Client-Id": CLIENT_ID,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    type: "channel.chat.message",
+                    version: "1",
+                    condition: {
+                        broadcaster_user_id: CHANNEL_ID[i],
+                        user_id: BOT_ID,
+                    },
+                    transport: {
+                        method: "websocket",
+                        session_id: websocketSessionID,
+                    },
+                }),
+            })
+        );
+
+        if (response[i].status != 202) {
+            let data = await response.json();
+            console.error(
+                "Failed to subscribe to channel.chat.message. API call returned status code " +
+                    response[i].status
+            );
+            console.error(data);
+            process.exit(1);
+        } else {
+            const data = await response[i].json();
+            console.log(
+                `Subscribed to channel.chat.message [${data.data[0].id}]`
+            );
+        }
+    }
+
+    /*
     let response = await fetch(
         "https://api.twitch.tv/helix/eventsub/subscriptions",
         {
@@ -142,7 +185,7 @@ async function registerEventSubListeners() {
     } else {
         const data = await response.json();
         console.log(`Subscribed to channel.chat.message [${data.data[0].id}]`);
-    }
+    }*/
 }
 
 /*
