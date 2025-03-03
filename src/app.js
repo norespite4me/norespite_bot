@@ -1,17 +1,17 @@
 import WebSocket from "ws";
 import { CLIENT_ID, OAUTH_TOKEN } from "../../twitch_bot_files/token";
 import * as react from "../lib/react.js";
-import { BOT_USERNAME, CHANNEL_ID } from "./constants.js";
+import { BOT_ID, BOT_USERNAME, CHANNEL_ID } from "./constants.js";
 import * as tool from "./tools.js";
 
 const EVENTSUB_WEBSOCKET_URL = "wss://eventsub.wss.twitch.tv/ws";
 
-var webSocketSessionID;
+var websocketSessionID;
 
 (async () => {
     await getAuth();
 
-    const webSocketClient = startWebSocketClient();
+    const websocketClient = startWebSocketClient();
 })();
 
 async function getAuth() {
@@ -36,25 +36,25 @@ async function getAuth() {
 }
 
 function startWebSocketClient() {
-    let webSocketClient = new webSocket(EVENTSUB_WEBSOCKET_URL);
+    let websocketClient = new WebSocket(EVENTSUB_WEBSOCKET_URL);
 
-    webSocketClient.on("error", console.error);
+    websocketClient.on("error", console.error);
 
-    webSocketClient.on("open", () => {
+    websocketClient.on("open", () => {
         console.log("WebSocket connection opened to " + EVENTSUB_WEBSOCKET_URL);
     });
 
-    webSocketClient.on("message", (data) => {
+    websocketClient.on("message", (data) => {
         handleWebSocketMessage(JSON.parse(data.toString()));
     });
 
-    return webSocketClient;
+    return websocketClient;
 }
 
 async function handleWebSocketMessage(data) {
     switch (data.metadata.message_type) {
         case "session_welcome":
-            webSocketSessionID = data.payload.session.id;
+            websocketSessionID = data.payload.session.id;
 
             registerEventSubListeners();
             break;
@@ -91,8 +91,8 @@ export async function sendChatMessage(chatMessage) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            broadcaster_id: CHANNEL_NAME,
-            sender_id: BOT_USERNAME,
+            broadcaster_id: CHANNEL_ID,
+            sender_id: BOT_ID,
             message: chatMessage,
         }),
     });
@@ -120,8 +120,8 @@ async function registerEventSubListeners() {
                 type: "channel.chat.message",
                 version: "1",
                 condition: {
-                    broadcaster_user_id: CHANNEL_NAME,
-                    user_id: BOT_USERNAME,
+                    broadcaster_user_id: CHANNEL_ID,
+                    user_id: BOT_ID,
                 },
                 transport: {
                     method: "websocket",
@@ -162,7 +162,7 @@ const opts = {
         username: BOT_USERNAME,
         password: OAUTH_TOKEN,
     },
-    channels: CHANNEL_NAME,
+    channels: CHANNEL_ID,
 };
 
 // Create a client with our options

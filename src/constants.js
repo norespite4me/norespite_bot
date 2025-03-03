@@ -2,6 +2,8 @@
 
 export const CHANNEL_ID = "155730582";
 
+export const BOT_ID = "175093545";
+
 export const SQUIRT_ENABLED = ["deanobeano"];
 
 export const LEVELS_DISABLED = ["deanobeano"];
