@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { CLIENT_ID, OAUTH_TOKEN } from "../../twitch_bot_files/token";
+import * as credentials from "../../twitch_bot_files/credentials.json" with { type: 'json' };
 import * as react from "../lib/react.js";
 import { BOT_ID, BOT_USERNAME, CHANNEL_ID } from "./constants.js";
 import * as tool from "./tools.js";
@@ -9,27 +9,62 @@ const EVENTSUB_WEBSOCKET_URL = "wss://eventsub.wss.twitch.tv/ws";
 var websocketSessionID;
 
 (async () => {
-    await getAuth();
-
-    const websocketClient = startWebSocketClient();
+	while (true) {
+		await checkToken();
+		await getAuth();
+		const websocketClient = startWebSocketClient();
+		await tool.sleep(7200000);
+		websocketClient.close();
+	}
 })();
+
+async function checkToken() {
+	await fetch("https://id.twitch.tv/oauth2/token", {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body: new URLSearchParams({
+			grant_type: 'refresh_token',
+			refresh_token: credentials.default.refresh_token,
+			client_id: credentials.default.client_id,
+			client_secret: credentials.default.client_secret
+		})
+	})
+	.then(response => response.json())
+	.then(data => {
+		credentials.default.access_token = data.access_token;
+		credentials.default.refresh_token = data.refresh_token;
+	})
+	.catch(error => console.error(`Error refreshing token: `, error));
+}
 
 async function getAuth() {
     let response = await fetch("https://id.twitch.tv/oauth2/validate", {
         method: "GET",
         headers: {
-            Authorization: "OAuth " + OAUTH_TOKEN,
+            Authorization: "OAuth " + credentials.default.access_token,
         },
-    });
+    });	//597mu8v2z2fdpacyoe6ldlwzxxrj53
 
     if (response.status != 200) {
         let data = await response.json();
         console.error(
-            "Token is not valid. /oauth2/validate retured status code " +
+            "Token is not valid. /oauth2/validate returned status code " +
                 response.status
         );
         console.error(data);
-        process.exit(1);
+
+        if (response.status != 200) {
+            let data = await response.json();
+            console.error(
+                "Token is not valid. /oauth2/validate returned status code " +
+                    response.status
+            );
+            console.error(data);
+
+            process.exit(1);c
+        }
     }
 
     console.log("Validated token.");
@@ -45,7 +80,12 @@ function startWebSocketClient() {
     });
 
     websocketClient.on("message", (data) => {
+		//console.log(JSON.parse(data));
         handleWebSocketMessage(JSON.parse(data.toString()));
+		if (data.includes("PING")) {
+			websocketClient.pong;
+			console.log("* PONGED");
+		}
     });
 
     return websocketClient;
@@ -85,8 +125,8 @@ export async function sendChatMessage(channel, chatMessage) {
     let response = await fetch("https://api.twitch.tv/helix/chat/messages", {
         method: "POST",
         headers: {
-            Authorization: "Bearer " + OAUTH_TOKEN,
-            "Client-Id": CLIENT_ID,
+            Authorization: "Bearer " + credentials.default.access_token,
+            "Client-Id": credentials.default.client_id,
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -113,8 +153,8 @@ async function registerEventSubListeners() {
             await fetch("https://api.twitch.tv/helix/eventsub/subscriptions", {
                 method: "POST",
                 headers: {
-                    Authorization: "Bearer " + OAUTH_TOKEN,
-                    "Client-Id": CLIENT_ID,
+                    Authorization: "Bearer " + credentials.default.access_token,
+                    "Client-Id": credentials.default.client_id,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
@@ -133,7 +173,7 @@ async function registerEventSubListeners() {
         );
 
         if (response[i].status != 202) {
-            let data = await response.json();
+            let data = await response[i].json();
             console.error(
                 "Failed to subscribe to channel.chat.message. API call returned status code " +
                     response[i].status
