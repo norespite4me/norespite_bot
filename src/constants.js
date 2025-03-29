@@ -20,7 +20,7 @@ export const ECONOMY_ENABLED = [];
 
 export const LINK_PROTECTION_ENABLED = [];
 
-export const SUPER_MOD = ["norespite", "deanobeano"];
+export const SUPER_MOD = ["norespite", "deanobeano", "skyyriel", "collinlemke"];
 
 export const BOT_USERNAME = "norespite";
 

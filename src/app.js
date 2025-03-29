@@ -80,7 +80,6 @@ function startWebSocketClient() {
     });
 
     websocketClient.on("message", (data) => {
-		//console.log(JSON.parse(data));
         handleWebSocketMessage(JSON.parse(data.toString()));
 		if (data.includes("PING")) {
 			websocketClient.pong;
