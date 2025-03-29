@@ -1,8 +1,9 @@
 import WebSocket from "ws";
-import * as credentials from "../../twitch_bot_files/credentials.json" with { type: 'json' };
+import credentials from "../../twitch_bot_files/credentials.json" with { type: 'json' };
 import * as react from "../lib/react.js";
 import { BOT_ID, BOT_USERNAME, CHANNEL_ID } from "./constants.js";
 import * as tool from "./tools.js";
+//let credentials = fetch('../../twitch_bot_files/credentials.json').then(res => res.json());
 
 const EVENTSUB_WEBSOCKET_URL = "wss://eventsub.wss.twitch.tv/ws";
 
@@ -26,15 +27,15 @@ async function checkToken() {
 		},
 		body: new URLSearchParams({
 			grant_type: 'refresh_token',
-			refresh_token: credentials.default.refresh_token,
-			client_id: credentials.default.client_id,
-			client_secret: credentials.default.client_secret
+			refresh_token: credentials.refresh_token,
+			client_id: credentials.client_id,
+			client_secret: credentials.client_secret
 		})
 	})
 	.then(response => response.json())
 	.then(data => {
-		credentials.default.access_token = data.access_token;
-		credentials.default.refresh_token = data.refresh_token;
+		credentials.access_token = data.access_token;
+		credentials.refresh_token = data.refresh_token;
 	})
 	.catch(error => console.error(`Error refreshing token: `, error));
 }
@@ -43,7 +44,7 @@ async function getAuth() {
     let response = await fetch("https://id.twitch.tv/oauth2/validate", {
         method: "GET",
         headers: {
-            Authorization: "OAuth " + credentials.default.access_token,
+            Authorization: "OAuth " + credentials.access_token,
         },
     });	//597mu8v2z2fdpacyoe6ldlwzxxrj53
 
@@ -124,8 +125,8 @@ export async function sendChatMessage(channel, chatMessage) {
     let response = await fetch("https://api.twitch.tv/helix/chat/messages", {
         method: "POST",
         headers: {
-            Authorization: "Bearer " + credentials.default.access_token,
-            "Client-Id": credentials.default.client_id,
+            Authorization: "Bearer " + credentials.access_token,
+            "Client-Id": credentials.client_id,
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -152,8 +153,8 @@ async function registerEventSubListeners() {
             await fetch("https://api.twitch.tv/helix/eventsub/subscriptions", {
                 method: "POST",
                 headers: {
-                    Authorization: "Bearer " + credentials.default.access_token,
-                    "Client-Id": credentials.default.client_id,
+                    Authorization: "Bearer " + credentials.access_token,
+                    "Client-Id": credentials.client_id,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
