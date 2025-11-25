@@ -46,7 +46,7 @@ async function getAuth() {
         headers: {
             Authorization: "OAuth " + credentials.access_token,
         },
-    });	//597mu8v2z2fdpacyoe6ldlwzxxrj53
+    });
 
     if (response.status != 200) {
         let data = await response.json();
