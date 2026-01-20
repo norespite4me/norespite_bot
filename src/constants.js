@@ -1,11 +1,6 @@
 export const CHANNEL_ID = [
     "155730582", //deanobeano
     "82780221", //skyyriel
-    "548154857", //laina
-    "28601033", //pamaj
-    "869092522", //honey
-    "106389328", //sara
-    "57216234", //bloo
 ];
 
 export const BOT_ID = "175093545";
