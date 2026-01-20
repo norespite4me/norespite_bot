@@ -1,6 +1,7 @@
 export const CHANNEL_ID = [
     "155730582", //deanobeano
     "82780221", //skyyriel
+    "102961839" //lakus
 ];
 
 export const BOT_ID = "175093545";
@@ -36,3 +37,4 @@ export const BLOCKED_WORDS = [
     "blackie",
     "blacky",
 ];
+
